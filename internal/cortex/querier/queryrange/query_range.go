@@ -32,6 +32,7 @@ import (
 
 	"github.com/thanos-io/thanos/internal/cortex/cortexpb"
 	"github.com/thanos-io/thanos/internal/cortex/util"
+	util_log "github.com/thanos-io/thanos/internal/cortex/util/log"
 	"github.com/thanos-io/thanos/internal/cortex/util/spanlogger"
 )
 
@@ -430,7 +431,7 @@ func (prometheusCodec) DecodeResponse(ctx context.Context, r *http.Response, _ R
 	for h, hv := range r.Header {
 		resp.Headers = append(resp.Headers, &PrometheusResponseHeader{Name: h, Values: hv})
 	}
-	level.Info(log).Log("msg", "range-query-frontend response headers", "headers", resp.Headers)
+	level.Info(util_log.WithContext(ctx, util_log.Logger)).Log("msg", "range-query-frontend response headers", "headers", resp.Headers)
 	return &resp, nil
 }
 
