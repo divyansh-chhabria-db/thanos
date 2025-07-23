@@ -74,11 +74,9 @@ func (c *queryRangeCodec) DecodeResponse(ctx context.Context, r *http.Response, 
 	// Log response headers at info level for range queries
 	if resp != nil && resp.GetHeaders() != nil {
 		// Convert headers to a log-friendly format
-		headerMap := make(map[string][]string)
 		for _, header := range resp.GetHeaders() {
-			headerMap[header.Name] = header.Values
+			level.Info(c.logger).Log("msg", "range-query-frontend response headers", "header", header.Name, "values", header.Values)
 		}
-		level.Info(c.logger).Log("msg", "range-query-frontend response headers", "headers", headerMap)
 	}
 
 	return resp, err
