@@ -54,6 +54,7 @@ func NewTripperware(config Config, reg prometheus.Registerer, logger log.Logger)
 	}
 
 	queryRangeCodec := NewThanosQueryRangeCodec(config.QueryRangeConfig.PartialResponseStrategy)
+	queryRangeCodec.SetLogger(logger)
 	labelsCodec := NewThanosLabelsCodec(config.LabelsConfig.PartialResponseStrategy, config.DefaultTimeRange)
 	queryInstantCodec := NewThanosQueryInstantCodec(config.QueryRangeConfig.PartialResponseStrategy)
 

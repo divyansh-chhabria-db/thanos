@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/weaveworks/common/httpgrpc"
@@ -44,6 +46,7 @@ var (
 type queryRangeCodec struct {
 	queryrange.Codec
 	partialResponse bool
+	logger          log.Logger
 }
 
 // NewThanosQueryRangeCodec initializes a queryRangeCodec.
@@ -51,7 +54,29 @@ func NewThanosQueryRangeCodec(partialResponse bool) *queryRangeCodec {
 	return &queryRangeCodec{
 		Codec:           queryrange.PrometheusCodec,
 		partialResponse: partialResponse,
+		logger:          log.NewNopLogger(), // Will be set later
 	}
+}
+
+// SetLogger sets the logger for this codec.
+func (c *queryRangeCodec) SetLogger(logger log.Logger) {
+	c.logger = logger
+}
+
+// DecodeResponse decodes a response and logs headers for range queries.
+func (c *queryRangeCodec) DecodeResponse(ctx context.Context, r *http.Response, req queryrange.Request) (queryrange.Response, error) {
+	// Call the parent DecodeResponse method
+	resp, err := c.Codec.DecodeResponse(ctx, r, req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Log response headers at info level for range queries
+	if resp != nil && resp.GetHeaders() != nil {
+		level.Info(c.logger).Log("msg", "range-query-frontend response headers", "headers", resp.GetHeaders())
+	}
+
+	return resp, err
 }
 
 func (c queryRangeCodec) DecodeRequest(_ context.Context, r *http.Request, forwardHeaders []string) (queryrange.Request, error) {
