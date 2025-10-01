@@ -171,6 +171,18 @@ func GetResponseStats(resp queryrange.Response) ResponseStats {
 		stats.Samples = seriesStatsCounter.Samples
 	}
 
+	// Log complete response structure for debugging
+	if resp != nil {
+		switch v := resp.(type) {
+		case *queryrange.PrometheusInstantQueryResponse:
+			respJSON, _ := json.MarshalIndent(v, "", "  ")
+			level.Debug(log.NewNopLogger()).Log("msg", "instant query response", "response", string(respJSON))
+		case *queryrange.PrometheusResponse:
+			respJSON, _ := json.MarshalIndent(v, "", "  ")
+			level.Debug(log.NewNopLogger()).Log("msg", "range query response", "response", string(respJSON))
+		}
+	}
+
 	return stats
 }
 
