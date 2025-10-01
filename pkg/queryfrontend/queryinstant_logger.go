@@ -5,6 +5,7 @@ package queryfrontend
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -187,6 +188,14 @@ func (m *instantQueryLoggingMiddleware) logInstantQuery(req *ThanosQueryInstantR
 	// Log to file if available.
 	if m.writer != nil {
 		m.writeToLogFile(instantQueryLog)
+	}
+
+	// Log the whole response for debugging/visibility.
+	if resp != nil {
+		respJSON, _ := json.MarshalIndent(resp, "", "  ")
+		m.logger.Log("msg", "instant query response", "response", string(respJSON))
+	} else {
+		m.logger.Log("msg", "instant query response is nil")
 	}
 }
 

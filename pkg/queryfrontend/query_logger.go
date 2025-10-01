@@ -148,7 +148,7 @@ func ConvertStoreMatchers(storeMatchers [][]*labels.Matcher) []StoreMatcherSet {
 	return result
 }
 
-// GetResponseStats calculates stats from query response (works for both range and instant queries).
+// GetResponseStats calculates stats from query response and logs the full response.
 func GetResponseStats(resp queryrange.Response) ResponseStats {
 	stats := ResponseStats{}
 
@@ -169,18 +169,6 @@ func GetResponseStats(resp queryrange.Response) ResponseStats {
 		stats.TimeseriesFetched = seriesStatsCounter.Series
 		stats.Chunks = seriesStatsCounter.Chunks
 		stats.Samples = seriesStatsCounter.Samples
-	}
-
-	// Log complete response structure for debugging
-	if resp != nil {
-		switch v := resp.(type) {
-		case *queryrange.PrometheusInstantQueryResponse:
-			respJSON, _ := json.MarshalIndent(v, "", "  ")
-			level.Debug(log.NewNopLogger()).Log("msg", "instant query response", "response", string(respJSON))
-		case *queryrange.PrometheusResponse:
-			respJSON, _ := json.MarshalIndent(v, "", "  ")
-			level.Debug(log.NewNopLogger()).Log("msg", "range query response", "response", string(respJSON))
-		}
 	}
 
 	return stats
